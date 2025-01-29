@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { fbxLoader, progressiveFBXLoader } from './src/utils/fbxLoader';
+import {
+	fbxLoader,
+	fbxLoaderWithWorker,
+	progressiveFBXLoader,
+} from './src/utils/fbxLoader';
 import { gLTFLoader, progressiveGLTFLoader } from './src/utils/gltfLoader';
 import addTestCube from './src/utils/addTestCube';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -28,7 +32,7 @@ directionalLight1.shadow.bias = -0.005; // Fine-tune this value
 scene.add(directionalLight1);
 
 // Add environment
-const pmremGenerator = new THREE.PMREMGenerator( renderer );
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
 scene.background = new THREE.Color(0xbfe3dd);
 scene.environment = pmremGenerator.fromScene(
 	new RoomEnvironment(),
@@ -48,6 +52,11 @@ progressiveFBXLoader({
 	scene,
 	rotateX: -Math.PI / 2,
 });
+// fbxLoaderWithWorker({
+// 	fileName: './src/models/LHR.fbx',
+// 	scene,
+// 	rotateX: -Math.PI / 2,
+// });
 // gLTFLoader({ fileName: './src/models/LHR.glb', scene });
 // progressiveGLTFLoader({ fileName: './src/models/LHR.glb', scene });
 // addTestCube({ scene });

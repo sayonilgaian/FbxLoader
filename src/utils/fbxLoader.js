@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 
 export function fbxLoader({ fileName = '', scene, rotateX = 0 }) {
@@ -66,4 +67,38 @@ export function progressiveFBXLoader({ fileName = '', scene, rotateX = 0 }) {
 			console.error('Error loading model:', error);
 		}
 	);
+}
+
+export function fbxLoaderWithWorker({ fileName = '', scene, rotateX = 0 }) {
+	const worker = new Worker(new URL('./fbxWorker.js', import.meta.url), {
+		type: 'module',
+	});
+
+	worker.postMessage({ fileName, rotateX });
+
+	// worker.onmessage = (event) => {
+	// 	const { type, model, progress, error } = event.data;
+
+	// 	if (type === 'progress') {
+	// 		console.log(`Loading progress: ${progress.toFixed(2)}%`);
+	// 	}
+
+	// 	if (type === 'complete') {
+	// 		console.log('Received fully processed model from worker');
+
+	// 		// Parse the full model from JSON
+	// 		const loadedObject = new THREE.ObjectLoader().parse(model);
+
+	// 		// Add the model to the scene
+	// 		scene.add(loadedObject);
+
+	// 		// Clean up the worker to free memory
+	// 		worker.terminate();
+	// 	}
+
+	// 	if (type === 'error') {
+	// 		console.error('Error loading FBX:', error);
+	// 		worker.terminate();
+	// 	}
+	// };
 }
