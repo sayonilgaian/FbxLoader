@@ -70,36 +70,52 @@ export function progressiveFBXLoader({ fileName = '', scene, rotateX = 0 }) {
 	);
 }
 
-export function fbxLoaderWithWorker({ fileName = '', scene, rotateX = 0 }) {
-	const worker = new Worker(new URL('./fbxWorker.js', import.meta.url), {
-		type: 'module',
-	});
+export async function fbxLoaderWithWorker({ fileName = '', scene, rotateX = 0 }) {
+    const worker = new Worker(new URL('./fbxWorker.js', import.meta.url), {
+        type: 'module',
+    });
 
-	worker.postMessage({ fileName, rotateX });
+    try {
+        console.log('Fetching FBX file:', fileName);
 
-	// worker.onmessage = (event) => {
-	// 	const { type, model, progress, error } = event.data;
+        // Fetch FBX file as binary (ArrayBuffer)
+        const response = await fetch(fileName);
+        if (!response.ok) throw new Error(`Failed to fetch file: ${response.statusText}`);
 
-	// 	if (type === 'progress') {
-	// 		console.log(`Loading progress: ${progress.toFixed(2)}%`);
-	// 	}
+        const fileData = await response.arrayBuffer();
+        console.log('Successfully fetched file. Sending to worker...', fileData.byteLength);
 
-	// 	if (type === 'complete') {
-	// 		console.log('Received fully processed model from worker');
+        // Ensure data is properly transferred
+        worker.postMessage({ fileData, rotateX }, [fileData]); // Transfer ownership of fileData
 
-	// 		// Parse the full model from JSON
-	// 		const loadedObject = new THREE.ObjectLoader().parse(model);
+        worker.onmessage = (event) => {
+            const { type, model, progress, error } = event.data;
 
-	// 		// Add the model to the scene
-	// 		scene.add(loadedObject);
+            if (type === 'progress') {
+                console.log(`Loading progress: ${progress.toFixed(2)}%`);
+            }
 
-	// 		// Clean up the worker to free memory
-	// 		worker.terminate();
-	// 	}
+            if (type === 'complete') {
+                console.log('Received fully processed model from worker');
 
-	// 	if (type === 'error') {
-	// 		console.error('Error loading FBX:', error);
-	// 		worker.terminate();
-	// 	}
-	// };
+                // Convert the JSON model back into a THREE.js object
+                const loadedObject = new THREE.ObjectLoader().parse(model);
+
+                // Add the model to the scene
+                scene.add(loadedObject);
+
+                // Clean up the worker to free memory
+                worker.terminate();
+            }
+
+            if (type === 'error') {
+                console.error('Error loading FBX:', error);
+                worker.terminate();
+            }
+        };
+    } catch (error) {
+        console.error('Error fetching FBX file:', error);
+    }
 }
+
+

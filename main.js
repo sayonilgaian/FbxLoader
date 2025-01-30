@@ -48,14 +48,8 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.maxPolarAngle = (85 * Math.PI) / 180; // 85 degrees
 controls.update();
 
-// Pass the scene to the loader
 // fbxLoader({ fileName: './src/models/LHR.fbx', scene });
-progressiveFBXLoader({
-	fileName: './src/models/LHR.fbx',
-	scene,
-	rotateX: -Math.PI / 2,
-});
-// fbxLoaderWithWorker({
+// progressiveFBXLoader({
 // 	fileName: './src/models/LHR.fbx',
 // 	scene,
 // 	rotateX: -Math.PI / 2,
@@ -63,6 +57,18 @@ progressiveFBXLoader({
 // gLTFLoader({ fileName: './src/models/LHR.glb', scene });
 // progressiveGLTFLoader({ fileName: './src/models/LHR.glb', scene });
 // addTestCube({ scene });
+
+// Load 3d model using worker thread
+fetch('./src/models/LHR.fbx') // Read file as ArrayBuffer
+	.then((response) => response.arrayBuffer())
+	.then((arrayBuffer) => {
+		fbxLoaderWithWorker({
+			fileData: arrayBuffer, // Pass binary data instead of file name
+			scene,
+			rotateX: -Math.PI / 2,
+		});
+	})
+	.catch((error) => console.error('Error fetching FBX file:', error));
 
 function animate() {
 	requestAnimationFrame(animate);
