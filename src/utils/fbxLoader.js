@@ -10,7 +10,8 @@ export function fbxLoader({ fileName = '', scene, rotateX = 0 }) {
 
 			// Rotate the entire loaded object by 90 degrees clockwise around the X-axis
 			loadedObject.rotation.x = -Math.PI / 2; // Negative for clockwise rotation
-
+			// Enable frustum culling explicitly
+			loadedObject.frustumCulled = true;
 			scene?.add(loadedObject); // Add the rotated object to the scene
 		},
 		(xhr) => {

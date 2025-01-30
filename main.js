@@ -17,7 +17,10 @@ const camera = new THREE.PerspectiveCamera(
 	20000
 );
 camera.position.set(0, 300, 500);
-const renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true });
+const renderer = new THREE.WebGLRenderer({
+	logarithmicDepthBuffer: true,
+	powerPreference: 'high-performance',
+});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
